@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liga BetPlay 2026-I · Dashboard de Campeonato</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#00c853;--verde-dark:#00962a;--amarillo:#ffd600;--rojo:#e53935;
+  --azul:#1565c0;--naranja:#ff6d00;--bg:#080c0a;--bg2:#0d1410;
+  --card:#0f1a12;--border:rgba(0,200,83,0.18);--text:#e8f5e9;--muted:#7aab88;--white:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-weight:300;overflow-x:hidden;}
+
+header{position:relative;background:linear-gradient(135deg,#000,#0a1f0d,#001a08);border-bottom:2px solid var(--verde);overflow:hidden;}
+header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-55deg,transparent,transparent 40px,rgba(0,200,83,.03) 40px,rgba(0,200,83,.03) 41px);}
+.header-inner{position:relative;display:flex;align-items:center;justify-content:space-between;padding:24px 48px;gap:20px;}
+.header-logo{display:flex;align-items:center;gap:18px;}
+.ball-icon{width:56px;height:56px;border-radius:50%;box-shadow:0 0 30px rgba(0,200,83,.5);flex-shrink:0;animation:spin 8s linear infinite;display:flex;align-items:center;justify-content:center;font-size:32px;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.header-title h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,3.5vw,3.2rem);letter-spacing:4px;line-height:1;color:var(--white);}
+.header-title h1 span{color:var(--verde);}
+.header-title p{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:4px;}
+.live-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(229,57,53,.15);border:1px solid var(--rojo);color:var(--rojo);font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:2px;padding:5px 12px;border-radius:2px;text-transform:uppercase;margin-bottom:6px;}
+.live-dot{width:7px;height:7px;background:var(--rojo);border-radius:50%;animation:blink 1s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.header-date{font-size:.76rem;color:var(--muted);}
+
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 48px;overflow-x:auto;gap:0;}
+.tab{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:14px 20px;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab:hover{color:var(--verde);}
+.tab.active{color:var(--verde);border-bottom-color:var(--verde);font-weight:700;}
+
+.section{display:none;padding:36px 48px;}
+.section.active{display:block;}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;color:var(--white);margin-bottom:4px;}
+.section-title span{color:var(--verde);}
+.section-sub{font-size:.82rem;color:var(--muted);letter-spacing:1px;margin-bottom:32px;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:22px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;}
+.card:hover{border-color:rgba(0,200,83,.45);transform:translateY(-2px);}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--verde),transparent);opacity:0;transition:opacity .2s;}
+.card:hover::after{opacity:1;}
+.card-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.card-value{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;line-height:1;color:var(--verde);}
+.divider{height:1px;background:var(--border);margin:18px 0;}
+
+/* ESCUDO OFICIAL - img real */
+.escudo{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle;}
+.escudo img{width:100%;height:100%;object-fit:contain;}
+.escudo-sm{width:28px;height:28px;}
+.escudo-md{width:44px;height:44px;}
+.escudo-lg{width:60px;height:60px;}
+.escudo-xl{width:84px;height:84px;}
+.team-row{display:flex;align-items:center;gap:9px;}
+
+/* FOTO JUGADOR */
+.player-photo{border-radius:50%;object-fit:cover;border:2px solid var(--verde);flex-shrink:0;background:#0d1a10;display:block;}
+.player-photo-sm{width:46px;height:46px;}
+.player-photo-lg{width:64px;height:64px;}
+.photo-fallback{border-radius:50%;flex-shrink:0;display:none;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;color:#fff;border:2px solid rgba(0,200,83,.4);}
+.photo-fallback-sm{width:46px;height:46px;font-size:.85rem;}
+.photo-fallback-lg{width:64px;height:64px;font-size:1.2rem;}
+
+/* CHAMPION */
+.champion-hero{background:linear-gradient(135deg,#001a08,#002b10,#001a08);border:1px solid rgba(0,200,83,.38);border-radius:4px;padding:36px;margin-bottom:26px;position:relative;overflow:hidden;text-align:center;}
+.champion-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,200,83,.07) 0%,transparent 70%);}
+.champion-tag{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:4px;text-transform:uppercase;color:var(--amarillo);margin-bottom:16px;display:block;}
+.champion-hero-inner{display:flex;align-items:center;justify-content:center;gap:28px;margin:8px 0 16px;}
+.champion-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,5vw,4.2rem);letter-spacing:5px;color:var(--verde);line-height:1;text-shadow:0 0 40px rgba(0,200,83,.4);}
+.champion-prob{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--amarillo);letter-spacing:3px;margin-top:4px;}
+.champion-reason{font-size:.86rem;color:var(--muted);max-width:600px;margin:12px auto 0;line-height:1.75;}
+
+.prob-list{display:flex;flex-direction:column;gap:13px;}
+.prob-item{display:grid;grid-template-columns:240px 1fr 58px;align-items:center;gap:13px;}
+.prob-team-cell{display:flex;align-items:center;gap:9px;font-family:'Barlow Condensed',sans-serif;font-size:.93rem;font-weight:600;letter-spacing:.5px;color:var(--white);}
+.prob-bar-track{height:10px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.prob-bar-fill{height:100%;border-radius:2px;transition:width 1.5s cubic-bezier(.22,.68,0,1.2);}
+.bar-1{background:linear-gradient(90deg,var(--verde-dark),var(--verde));}
+.bar-2{background:linear-gradient(90deg,#c62828,var(--rojo));}
+.bar-3{background:linear-gradient(90deg,#1a237e,var(--azul));}
+.bar-4{background:linear-gradient(90deg,#e65100,var(--naranja));}
+.prob-pct{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;text-align:right;}
+.pct-1{color:var(--verde);}.pct-2{color:var(--rojo);}.pct-3{color:var(--azul);}.pct-4{color:var(--naranja);}
+
+/* BRACKET */
+.bracket{display:grid;grid-template-columns:1fr 190px 1fr;align-items:center;margin-bottom:28px;gap:0;}
+.bracket-col{display:flex;flex-direction:column;gap:14px;}
+.bracket-mid{display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 14px;}
+.match-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:18px;}
+.match-label{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.match-team{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
+.match-team-name{display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:.3px;color:var(--white);}
+.match-sep{height:1px;background:var(--border);margin:2px 0;}
+.team-score{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--verde);}
+.team-adv{display:inline-block;background:rgba(0,200,83,.14);border:1px solid rgba(0,200,83,.5);color:var(--verde);font-family:'Barlow Condensed',sans-serif;font-size:.58rem;letter-spacing:1px;padding:1px 5px;border-radius:2px;text-transform:uppercase;margin-left:5px;}
+.match-note{font-size:.7rem;color:var(--muted);margin-top:7px;font-style:italic;}
+.final-box{background:linear-gradient(135deg,#001a08,#002b10);border:2px solid var(--verde);border-radius:4px;padding:18px 14px;text-align:center;width:100%;}
+.final-box-label{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;letter-spacing:3px;color:var(--amarillo);text-transform:uppercase;margin-bottom:8px;display:block;}
+.final-box-text{font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:var(--verde);letter-spacing:2px;margin-top:8px;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:.86rem;}
+.data-table thead th{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 11px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.data-table tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;}
+.data-table tbody tr:hover{background:rgba(0,200,83,.05);}
+.data-table tbody td{padding:9px 11px;color:var(--text);}
+.rank{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;color:var(--muted);}
+.rank.gold{color:var(--amarillo);}.rank.silver{color:#bdbdbd;}.rank.bronze{color:#a1887f;}
+.pts{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:var(--verde);}
+.highlight-row td{background:rgba(0,200,83,.06);}
+.tag{display:inline-block;padding:2px 7px;font-family:'Barlow Condensed',sans-serif;font-size:.66rem;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;}
+.tag-g{background:rgba(0,200,83,.14);border:1px solid rgba(0,200,83,.4);color:var(--verde);}
+.tag-r{background:rgba(229,57,53,.12);border:1px solid rgba(229,57,53,.4);color:var(--rojo);}
+.tag-b{background:rgba(21,101,192,.14);border:1px solid rgba(21,101,192,.4);color:#42a5f5;}
+.tag-y{background:rgba(255,214,0,.12);border:1px solid rgba(255,214,0,.4);color:var(--amarillo);}
+
+/* SCORERS */
+.scorers-list{display:flex;flex-direction:column;gap:10px;}
+.scorer-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px 16px;transition:border-color .2s;}
+.scorer-item:hover{border-color:rgba(0,200,83,.42);}
+.scorer-rank{font-family:'Bebas Neue',sans-serif;font-size:1.45rem;width:26px;text-align:center;flex-shrink:0;}
+.r1{color:var(--amarillo);}.r2{color:#bdbdbd;}.r3{color:#a1887f;}.rn{color:var(--muted);font-size:1.05rem;}
+.scorer-info{flex:1;min-width:0;}
+.scorer-name{font-family:'Barlow Condensed',sans-serif;font-size:.98rem;font-weight:700;color:var(--white);}
+.scorer-club{display:flex;align-items:center;gap:5px;font-size:.74rem;color:var(--muted);margin-top:3px;}
+.scorer-status{display:inline-block;font-size:.6rem;letter-spacing:1px;padding:2px 5px;border-radius:2px;text-transform:uppercase;margin-top:4px;font-family:'Barlow Condensed',sans-serif;}
+.st-ok{background:rgba(0,200,83,.12);border:1px solid rgba(0,200,83,.3);color:var(--verde);}
+.st-out{background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.3);color:var(--rojo);}
+.goals-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--verde);line-height:1;}
+.goals-label{font-size:.66rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+
+/* PLAYER CARDS */
+.player-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:18px;}
+.player-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:20px;transition:all .2s;}
+.player-card:hover{border-color:rgba(0,200,83,.42);transform:translateY(-3px);}
+.player-card-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.player-card-name{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--white);letter-spacing:.2px;line-height:1.2;}
+.player-card-pos{font-size:.7rem;color:var(--muted);margin-top:3px;}
+.player-card-club{display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--verde);font-weight:500;margin-top:5px;}
+.perf-score{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;font-family:'Bebas Neue',sans-serif;font-size:1.15rem;border:2px solid;flex-shrink:0;margin-left:auto;}
+.pa{border-color:var(--verde);color:var(--verde);background:rgba(0,200,83,.1);}
+.pb{border-color:var(--amarillo);color:var(--amarillo);background:rgba(255,214,0,.1);}
+.stat-rows{display:flex;flex-direction:column;gap:8px;}
+.stat-row{display:flex;justify-content:space-between;align-items:center;}
+.stat-label{font-size:.74rem;color:var(--muted);}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:600;color:var(--white);}
+.stat-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:2px;overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:2px;}
+.player-note{margin-top:10px;font-size:.72rem;color:var(--muted);line-height:1.55;border-top:1px solid var(--border);padding-top:9px;}
+
+/* TEAM STATS */
+.team-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:20px;}
+.team-card-header{display:flex;align-items:center;gap:13px;margin-bottom:16px;}
+.team-card-name{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:2px;color:var(--white);line-height:1;}
+.team-card-pts{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:var(--muted);margin-top:3px;}
+.team-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.team-stat-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:3px;padding:8px;text-align:center;}
+.team-stat-box .val{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;color:var(--verde);line-height:1;}
+.team-stat-box .lbl{font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.radar-label{font-family:'Barlow Condensed',sans-serif;font-size:.66rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.radar-bars{display:flex;flex-direction:column;gap:7px;}
+.radar-row{display:flex;align-items:center;gap:8px;}
+.radar-name{font-size:.7rem;color:var(--muted);width:72px;flex-shrink:0;}
+.radar-track{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.radar-fill{height:100%;border-radius:2px;}
+.radar-val{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;color:var(--white);width:28px;text-align:right;flex-shrink:0;}
+
+.prediction-section{background:linear-gradient(135deg,#001208,#001f0d);border:1px solid rgba(0,200,83,.22);border-radius:4px;padding:26px;margin-top:26px;}
+.prediction-title{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:3px;color:var(--amarillo);margin-bottom:18px;}
+.prediction-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.pred-item{display:flex;gap:11px;align-items:flex-start;}
+.pred-icon{font-size:1.4rem;flex-shrink:0;margin-top:2px;}
+.pred-text-title{font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;color:var(--white);letter-spacing:.2px;margin-bottom:3px;}
+.pred-text-body{font-size:.78rem;color:var(--muted);line-height:1.65;}
+
+.mt16{margin-top:16px;}.mt24{margin-top:24px;}.mt28{margin-top:28px;}
+footer{margin-top:50px;border-top:1px solid var(--border);padding:16px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.footer-brand{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:3px;color:var(--verde);}
+.footer-note{font-size:.7rem;color:var(--muted);}
+
+@media(max-width:900px){
+  .header-inner,.tabs,.section,footer{padding-left:18px;padding-right:18px;}
+  .grid-2,.grid-4,.prediction-grid{grid-template-columns:1fr;}
+  .prob-item{grid-template-columns:190px 1fr 48px;}
+  .bracket{grid-template-columns:1fr;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ URLS DE ESCUDOS OFICIALES ═══════════════
+  Fuente: assets.football-logos.cc (CDN público, editorial use)
+  Equipos Liga BetPlay I-2026 — Categoría Primera A Colombia
+═══════════════════════════════════════════════════════════ -->
+<script>
+// Mapa de escudos oficiales - football-logos.cc
+const SH = {
+  nacional:   "https://assets.football-logos.cc/logos/colombia/256x256/atletico-nacional.4ddc325f.png",
+  junior:     "https://assets.football-logos.cc/logos/colombia/256x256/atletico-junior.e3dda848.png",
+  santafe:    "https://assets.football-logos.cc/logos/colombia/256x256/independiente-santa-fe.79161278.png",
+  tolima:     "https://assets.football-logos.cc/logos/colombia/256x256/deportes-tolima.053332de.png",
+  pasto:      "https://assets.football-logos.cc/logos/colombia/256x256/deportivo-pasto.f3545008.png",
+  america:    "https://assets.football-logos.cc/logos/colombia/256x256/america-de-cali.f3646c89.png",
+  oncecaldas: "https://assets.football-logos.cc/logos/colombia/256x256/once-caldas.44467c26.png",
+  millonarios:"https://assets.football-logos.cc/logos/colombia/256x256/millonarios.78c9e996.png",
+  bucaramanga:"https://assets.football-logos.cc/logos/colombia/256x256/bucaramanga.277d3771.png",
+  cali:       "https://assets.football-logos.cc/logos/colombia/256x256/deportivo-cali.png",
+  medellin:   "https://assets.football-logos.cc/logos/colombia/256x256/independiente-medellin.dfa39679.png",
+  aguilas:    "https://assets.football-logos.cc/logos/colombia/256x256/aguilas-doradas.58d7220f.png",
+  llaneros:   "https://assets.football-logos.cc/logos/colombia/256x256/llaneros.004e2376.png",
+  fortaleza:  "https://assets.football-logos.cc/logos/colombia/256x256/fortaleza-ceif.a049a349.png",
+  intbogota:  "https://assets.football-logos.cc/logos/colombia/256x256/internacional-de-bogota.png",
+  pereira:    "https://assets.football-logos.cc/logos/colombia/256x256/deportivo-pereira.3fc6bc22.png",
+};
+// Fotos jugadores - Transfermarkt (IDs oficiales)
+const PH = {
+  morelos:   "https://img.a.transfermarkt.technology/portrait/big/338962-1706278800.jpg",
+  rodallega: "https://img.a.transfermarkt.technology/portrait/big/37934-1695124800.jpg",
+  muriel:    "https://img.a.transfermarkt.technology/portrait/big/197971-1695124800.jpg",
+  estupinan: "https://img.a.transfermarkt.technology/portrait/big/577729-1695124800.jpg",
+  campuzano: "https://img.a.transfermarkt.technology/portrait/big/459467-1706278800.jpg",
+  fernandez: "https://img.a.transfermarkt.technology/portrait/big/743492-1695124800.jpg",
+  sandoval:  "https://img.a.transfermarkt.technology/portrait/big/499821-1695124800.jpg",
+  bustos:    "https://img.a.transfermarkt.technology/portrait/big/516803-1695124800.jpg",
+};
+// Colores fallback por jugador
+const PFB = {
+  morelos:"135deg,#1b5e20,#43a047", rodallega:"135deg,#b71c1c,#e53935",
+  muriel:"135deg,#0d47a1,#1565c0", estupinan:"135deg,#e65100,#ff6d00",
+  campuzano:"135deg,#1b5e20,#43a047", fernandez:"135deg,#0d47a1,#1565c0",
+  sandoval:"135deg,#f57f17,#ffd600", bustos:"135deg,#b71c1c,#e53935",
+};
+const PINit = { morelos:"AM", rodallega:"HR", muriel:"LM", estupinan:"AE",
+  campuzano:"JC", fernandez:"OF", sandoval:"LS", bustos:"NB" };
+
+function escudo(team, size) {
+  const s = size || "sm";
+  const px = {sm:"28px",md:"44px",lg:"60px",xl:"84px"}[s];
+  return `<span class="escudo escudo-${s}"><img src="${SH[team]||""}" alt="${team}" style="width:${px};height:${px};object-fit:contain;" onerror="this.style.display='none'"></span>`;
+}
+function foto(player, sizeClass) {
+  const lg = sizeClass === "lg";
+  const sz = lg ? "64px" : "46px";
+  const fc = lg ? "photo-fallback-lg" : "photo-fallback-sm";
+  const pc = lg ? "player-photo-lg" : "player-photo-sm";
+  return `<img class="player-photo ${pc}" src="${PH[player]}" alt="${player}"
+    onerror="this.style.display='none';this.nextSibling.style.display='flex'">` +
+    `<div class="photo-fallback ${fc}" style="background:linear-gradient(${PFB[player]||"135deg,#333,#666"});border:2px solid rgba(0,200,83,.4)">${PINit[player]||"?"}</div>`;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Inyectar escudos
+  document.querySelectorAll("[data-escudo]").forEach(el => {
+    const [team, size] = el.dataset.escudo.split(":");
+    el.innerHTML = escudo(team, size || "sm");
+  });
+  // Inyectar fotos
+  document.querySelectorAll("[data-foto]").forEach(el => {
+    const [player, size] = el.dataset.foto.split(":");
+    el.innerHTML = foto(player, size || "sm");
+  });
+  setTimeout(animateBars, 500);
+});
+
+function showTab(id, btn) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("tab-" + id).classList.add("active");
+  btn.classList.add("active");
+  if (id === "resumen") setTimeout(animateBars, 120);
+}
+function animateBars() {
+  document.querySelectorAll(".prob-bar-fill[data-w]").forEach(b => { b.style.width = b.dataset.w; });
+}
+</script>
+
+<header>
+  <div class="header-inner">
+    <div class="header-logo">
+      <div class="ball-icon">⚽</div>
+      <div class="header-title">
+        <h1>Liga <span>BetPlay</span> Dimayor</h1>
+        <p>Dashboard · Análisis · Predicción · 1er Semestre 2026</p>
+      </div>
+    </div>
+    <div>
+      <div class="live-badge"><div class="live-dot"></div>&nbsp;Semifinales en curso</div>
+      <div class="header-date">📅 Sábado 23 de mayo, 2026 &nbsp;·&nbsp; Fuente: Dimayor / GolCaracol / ESPN / Futbolred</div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" onclick="showTab('resumen',this)">🏆 Resumen &amp; Predicción</button>
+  <button class="tab" onclick="showTab('semifinales',this)">⚔️ Semifinales</button>
+  <button class="tab" onclick="showTab('tabla',this)">📊 Tabla de Posiciones</button>
+  <button class="tab" onclick="showTab('goleadores',this)">⚽ Goleadores</button>
+  <button class="tab" onclick="showTab('equipos',this)">🛡️ Stats por Equipo</button>
+  <button class="tab" onclick="showTab('jugadores',this)">👤 Stats por Jugador</button>
+</nav>
+
+<!-- ═══════════════════════ RESUMEN ═══════════════════════ -->
+<section id="tab-resumen" class="section active">
+  <div class="section-title">Predicción del <span>Campeón</span></div>
+  <p class="section-sub">Análisis basado en datos reales de la Liga BetPlay I-2026 · Fase Regular + Playoffs</p>
+
+  <div class="champion-hero">
+    <span class="champion-tag">🏆 Campeón Predicho · Modelo Analítico I-2026</span>
+    <div class="champion-hero-inner">
+      <span data-escudo="nacional:xl"></span>
+      <div>
+        <div class="champion-name">Atlético Nacional</div>
+        <div class="champion-prob">Probabilidad: 62%</div>
+      </div>
+      <span data-escudo="nacional:xl"></span>
+    </div>
+    <p class="champion-reason">Líder absoluto de la fase regular con 40 puntos y diferencia de gol +20. Ganaron el partido de ida de semifinales 1-0 visitando Ibagué. Alfredo Morelos en estado de gracia con 10 goles. Diego Arias tiene al equipo defensivamente sólido y con clara ventaja global para llegar a la final.</p>
+  </div>
+
+  <div class="card mt24">
+    <div class="card-label">Probabilidad de Campeonato — Equipos Semifinalistas</div>
+    <div class="divider"></div>
+    <div class="prob-list">
+      <div class="prob-item">
+        <div class="prob-team-cell"><span data-escudo="nacional:sm"></span>Atlético Nacional</div>
+        <div class="prob-bar-track"><div class="prob-bar-fill bar-1" style="width:0%" data-w="62%"></div></div>
+        <div class="prob-pct pct-1">62%</div>
+      </div>
+      <div class="prob-item">
+        <div class="prob-team-cell"><span data-escudo="junior:sm"></span>Junior FC</div>
+        <div class="prob-bar-track"><div class="prob-bar-fill bar-3" style="width:0%" data-w="22%"></div></div>
+        <div class="prob-pct pct-3">22%</div>
+      </div>
+      <div class="prob-item">
+        <div class="prob-team-cell"><span data-escudo="santafe:sm"></span>Ind. Santa Fe</div>
+        <div class="prob-bar-track"><div class="prob-bar-fill bar-2" style="width:0%" data-w="10%"></div></div>
+        <div class="prob-pct pct-2">10%</div>
+      </div>
+      <div class="prob-item">
+        <div class="prob-team-cell"><span data-escudo="tolima:sm"></span>Deportes Tolima</div>
+        <div class="prob-bar-track"><div class="prob-bar-fill bar-4" style="width:0%" data-w="6%"></div></div>
+        <div class="prob-pct pct-4">6%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-4 mt24">
+    <div class="card">
+      <div class="card-label">Líder Fase Regular</div>
+      <div class="card-value">40</div>
+      <div style="display:flex;align-items:center;gap:7px;margin-top:9px;font-size:.78rem;color:var(--muted)"><span data-escudo="nacional:sm"></span>Nacional · 13V-1E-5D</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Mejor Goleador</div>
+      <div class="card-value">13</div>
+      <div style="display:flex;align-items:center;gap:7px;margin-top:9px;font-size:.78rem;color:var(--muted)"><span data-escudo="pasto:sm"></span>Estupiñán · Pasto</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Mayor Dif. de Gol</div>
+      <div class="card-value">+20</div>
+      <div style="display:flex;align-items:center;gap:7px;margin-top:9px;font-size:.78rem;color:var(--muted)"><span data-escudo="nacional:sm"></span>19 jornadas fase reg.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Equipos Semifinalistas</div>
+      <div class="card-value">4</div>
+      <div style="display:flex;align-items:center;gap:5px;margin-top:9px;flex-wrap:wrap;">
+        <span data-escudo="nacional:sm"></span><span data-escudo="junior:sm"></span>
+        <span data-escudo="santafe:sm"></span><span data-escudo="tolima:sm"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="prediction-section">
+    <div class="prediction-title">🔮 Análisis de Factores de Predicción</div>
+    <div class="prediction-grid">
+      <div class="pred-item"><div class="pred-icon">📈</div><div><div class="pred-text-title">Rendimiento Fase Regular</div><div class="pred-text-body">Nacional 1° con 40 pts y +20 gol. Junior 2° con 35 pts. Pasto 3° con 34 pts (eliminado). Tolima 6° con 31 pts clasificó pese a inconsistencias.</div></div></div>
+      <div class="pred-item"><div class="pred-icon">⚔️</div><div><div class="pred-text-title">Resultado Semifinales Ida</div><div class="pred-text-body">Nacional venció 1-0 a Tolima visitando Ibagué (Morelos). Junior empató 1-1 en Bogotá vs Santa Fe (penal Rodallega). Favorece a Nacional y Junior de cara a la vuelta en casa.</div></div></div>
+      <div class="pred-item"><div class="pred-icon">🏟️</div><div><div class="pred-text-title">Factor Local en la Vuelta</div><div class="pred-text-body">Nacional juega en el Atanasio Girardot (6pm) con ventaja global 1-0. Junior recibe en el Romelio Martínez (8:30pm) con global empatado 1-1.</div></div></div>
+      <div class="pred-item"><div class="pred-icon">⚽</div><div><div class="pred-text-title">Potencial Ofensivo</div><div class="pred-text-body">Morelos (Nacional) y Rodallega (Santa Fe, 40 años) son las principales amenazas. Muriel (Junior, 11 goles) puede ser decisivo en el Romelio. Estupiñán (13 goles) quedó fuera con Pasto.</div></div></div>
+      <div class="pred-item"><div class="pred-icon">🏆</div><div><div class="pred-text-title">Historial y Tradición</div><div class="pred-text-body">Junior es el campeón defensor. Nacional es el equipo más consistente del torneo con mayor diferencia de gol en los últimos cinco semestres del FPC.</div></div></div>
+      <div class="pred-item"><div class="pred-icon">🎯</div><div><div class="pred-text-title">Final Proyectada</div><div class="pred-text-body"><strong style="color:var(--verde)">Atlético Nacional</strong> vs <strong style="color:#42a5f5">Junior FC</strong> — la final más atractiva del fútbol colombiano en 2026. Nacional favorito por su rendimiento global en la temporada.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SEMIFINALES ═══════════════════ -->
+<section id="tab-semifinales" class="section">
+  <div class="section-title">Semifinales <span>I-2026</span></div>
+  <p class="section-sub">Fase III · Vuelta programada para el sábado 23 de mayo de 2026</p>
+
+  <div class="bracket">
+    <div class="bracket-col">
+      <div class="match-card">
+        <div class="match-label">Llave 1 — Ida · 16 May · Ibagué</div>
+        <div class="match-team"><div class="match-team-name"><span data-escudo="tolima:sm"></span>Deportes Tolima</div><span class="team-score">0</span></div>
+        <div class="match-sep"></div>
+        <div class="match-team"><div class="match-team-name"><span data-escudo="nacional:sm"></span>Atlético Nacional<span class="team-adv">VENTAJA</span></div><span class="team-score" style="color:var(--verde)">1</span></div>
+        <div class="match-note">Gol: Alfredo Morelos (Nacional). Polémica expulsión temprana (Tolima).</div>
+      </div>
+      <div class="match-card" style="border-color:rgba(0,200,83,.4)">
+        <div class="match-label">Llave 1 — Vuelta · 23 May · Atanasio Girardot · 6:00 PM</div>
+        <div class="match-team"><div class="match-team-name"><span data-escudo="nacional:sm"></span>Atlético Nacional<span class="team-adv">LOCAL</span></div><span class="team-score">?</span></div>
+        <div class="match-sep"></div>
+        <div class="match-team"><div class="match-team-name"><span data-escudo="tolima:sm"></span>Deportes Tolima</div><span class="team-score">?</span></div>
+        <div class="match-note">Global: Nacional 1 – Tolima 0. Tolima necesita ganar por 2+ goles en Medellín.</div>
+      </div>
+    </div>
+
+    <div class="bracket-mid">
+      <span style="color:var(--verde);font-size:1.4rem">→</span>
+      <div class="final-box">
+        <span class="final-box-label">Gran Final</span>
+        <div style="font-size:2rem;margin-bottom:8px">🏆</div>
+        <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:8px">
+          <span data-escudo="nacional:sm"></span>
+          <span style="font-family:'Bebas Neue';color:var(--muted);font-size:.9rem">VS</span>
+          <span data-escudo="junior:sm"></span>
+        </div>
+        <div class="final-box-text">Junio 2026</div>
+      </div>
+      <span style="color:var(--verde);font-size:1.4rem">←</span>
+    </div>
+
+    <div class="bracket-col">
+      <div class="match-card">
+        <div class="match-label">Llave 2 — Ida · 16 May · Bogotá (El Campín)</div>
+        <div class="match-team"><div class="match-team-name"><span data-escudo="santafe:sm"></span>Ind. Santa Fe</div><span class="team-score">1</span></div>
+        <div class="match-sep"></div>
+        <div class="match-team"><div class="match-team-name"><span data-escudo="junior:sm"></span>Junior FC<span class="team-adv">L. VENTAJA</span></div><span class="team-score" style="color:#42a5f5">1</span></div>
+        <div class="match-note">Autogol Scarpeta (37') → Rodallega penal (85'). Serie igualada.</div>
+      </div>
+      <div class="match-card" style="border-color:rgba(21,101,192,.4)">
+        <div class="match-label">Llave 2 — Vuelta · 23 May · Romelio Martínez · 8:30 PM</div>
+        <div class="match-team"><div class="match-team-name"><span data-escudo="junior:sm"></span>Junior FC<span class="team-adv">LOCAL</span></div><span class="team-score">?</span></div>
+        <div class="match-sep"></div>
+        <div class="match-team"><div class="match-team-name"><span data-escudo="santafe:sm"></span>Ind. Santa Fe</div><span class="team-score">?</span></div>
+        <div class="match-note">Global: 1-1. Empate global → penales. Ventaja barranquillera como local.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2 mt24">
+    <div class="card">
+      <div class="card-label" style="display:flex;align-items:center;gap:8px"><span data-escudo="nacional:sm"></span>Análisis Llave 1 · Nacional vs Tolima</div>
+      <div class="divider"></div>
+      <p style="font-size:.85rem;color:var(--text);line-height:1.75;margin-bottom:10px"><strong style="color:var(--verde)">Nacional</strong> tiene una ventaja cómoda. Jugará la vuelta en casa en el Atanasio. El técnico Diego Arias mantiene un equipo sólido. Morelos y Campuzano son las piezas diferenciales.</p>
+      <p style="font-size:.85rem;color:var(--text);line-height:1.75;margin-bottom:12px"><strong style="color:var(--naranja)">Tolima</strong> necesita un milagro: ganar en Medellín por 2+ goles. Su debilidad como visitante (5.2/10) es crítica. El DT Lucas González criticó el arbitraje de la ida.</p>
+      <div><span class="tag tag-g">Nacional FAVORITO</span><span class="tag tag-r" style="margin-left:4px">Tolima necesita reacción</span></div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="display:flex;align-items:center;gap:8px"><span data-escudo="junior:sm"></span>Análisis Llave 2 · Junior vs Santa Fe</div>
+      <div class="divider"></div>
+      <p style="font-size:.85rem;color:var(--text);line-height:1.75;margin-bottom:10px"><strong style="color:#42a5f5">Junior</strong> llega con la moral alta al Romelio. Con Muriel (11 goles) y condición de local, el Tiburón es ligeramente favorito. Fernández Frasica puede ser decisivo.</p>
+      <p style="font-size:.85rem;color:var(--text);line-height:1.75;margin-bottom:12px"><strong style="color:var(--rojo)">Santa Fe</strong> con Rodallega (40 años, 11 goles) sigue sorprendiendo. También compiten en Copa Libertadores — el desgaste es un factor adicional a considerar.</p>
+      <div><span class="tag tag-b">Junior LEVE VENTAJA</span><span class="tag tag-r" style="margin-left:4px">Santa Fe tiene opciones</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ TABLA ═══════════════════════ -->
+<section id="tab-tabla" class="section">
+  <div class="section-title">Tabla de <span>Posiciones</span></div>
+  <p class="section-sub">Fase Regular finalizada · 19 jornadas · Clasificados a Playoffs resaltados</p>
+  <div class="card">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr class="highlight-row"><td class="rank gold">1</td><td><div class="team-row"><span data-escudo="nacional:sm"></span><strong>Atlético Nacional</strong></div></td><td>19</td><td>13</td><td>1</td><td>5</td><td>52</td><td>32</td><td style="color:var(--verde)">+20</td><td class="pts">40</td><td><span class="tag tag-g">🏆 Semis</span></td></tr>
+        <tr class="highlight-row"><td class="rank silver">2</td><td><div class="team-row"><span data-escudo="junior:sm"></span><strong>Junior FC</strong></div></td><td>19</td><td>11</td><td>2</td><td>6</td><td>43</td><td>29</td><td style="color:var(--verde)">+14</td><td class="pts">35</td><td><span class="tag tag-g">🏆 Semis</span></td></tr>
+        <tr class="highlight-row"><td class="rank bronze">3</td><td><div class="team-row"><span data-escudo="pasto:sm"></span><strong>Deportivo Pasto</strong></div></td><td>19</td><td>10</td><td>4</td><td>5</td><td>39</td><td>25</td><td style="color:var(--verde)">+14</td><td class="pts">34</td><td><span class="tag tag-r">❌ Elim. Q</span></td></tr>
+        <tr class="highlight-row"><td class="rank">4</td><td><div class="team-row"><span data-escudo="america:sm"></span><strong>América de Cali</strong></div></td><td>19</td><td>10</td><td>3</td><td>6</td><td>36</td><td>28</td><td style="color:var(--verde)">+8</td><td class="pts">33</td><td><span class="tag tag-r">❌ Elim. Q</span></td></tr>
+        <tr class="highlight-row"><td class="rank">5</td><td><div class="team-row"><span data-escudo="oncecaldas:sm"></span><strong>Once Caldas</strong></div></td><td>19</td><td>10</td><td>3</td><td>6</td><td>34</td><td>28</td><td style="color:var(--verde)">+6</td><td class="pts">33</td><td><span class="tag tag-r">❌ Elim. Q</span></td></tr>
+        <tr class="highlight-row"><td class="rank">6</td><td><div class="team-row"><span data-escudo="tolima:sm"></span><strong>Deportes Tolima</strong></div></td><td>19</td><td>9</td><td>4</td><td>6</td><td>33</td><td>28</td><td style="color:var(--verde)">+5</td><td class="pts">31</td><td><span class="tag tag-g">🏆 Semis</span></td></tr>
+        <tr class="highlight-row"><td class="rank">7</td><td><div class="team-row"><span data-escudo="santafe:sm"></span><strong>Ind. Santa Fe</strong></div></td><td>19</td><td>8</td><td>5</td><td>6</td><td>31</td><td>27</td><td style="color:var(--verde)">+4</td><td class="pts">29</td><td><span class="tag tag-g">🏆 Semis</span></td></tr>
+        <tr class="highlight-row"><td class="rank">8</td><td><div class="team-row"><span data-escudo="intbogota:sm"></span><strong>Int. Bogotá</strong></div></td><td>19</td><td>8</td><td>4</td><td>7</td><td>29</td><td>30</td><td style="color:var(--rojo)">-1</td><td class="pts">28</td><td><span class="tag tag-r">❌ Elim. Q</span></td></tr>
+        <tr><td class="rank">9</td><td><div class="team-row"><span data-escudo="cali:sm"></span>Deportivo Cali</div></td><td>19</td><td>8</td><td>3</td><td>8</td><td>28</td><td>30</td><td style="color:var(--rojo)">-2</td><td class="pts" style="color:var(--muted)">27</td><td><span class="tag tag-r">❌ Eliminado</span></td></tr>
+        <tr><td class="rank">10</td><td><div class="team-row"><span data-escudo="millonarios:sm"></span>Millonarios FC</div></td><td>19</td><td>7</td><td>5</td><td>7</td><td>27</td><td>28</td><td style="color:var(--rojo)">-1</td><td class="pts" style="color:var(--muted)">26</td><td><span class="tag tag-r">❌ Eliminado</span></td></tr>
+        <tr><td class="rank">11</td><td><div class="team-row"><span data-escudo="medellin:sm"></span>Ind. Medellín</div></td><td>19</td><td>7</td><td>5</td><td>7</td><td>26</td><td>28</td><td style="color:var(--rojo)">-2</td><td class="pts" style="color:var(--muted)">26</td><td><span class="tag tag-r">❌ Eliminado</span></td></tr>
+        <tr><td class="rank">12</td><td><div class="team-row"><span data-escudo="aguilas:sm"></span>Águilas Doradas</div></td><td>19</td><td>7</td><td>5</td><td>7</td><td>26</td><td>30</td><td style="color:var(--rojo)">-4</td><td class="pts" style="color:var(--muted)">26</td><td><span class="tag tag-r">❌ Eliminado</span></td></tr>
+        <tr><td class="rank">13</td><td><div class="team-row"><span data-escudo="bucaramanga:sm"></span>Atl. Bucaramanga</div></td><td>19</td><td>6</td><td>5</td><td>8</td><td>24</td><td>29</td><td style="color:var(--rojo)">-5</td><td class="pts" style="color:var(--muted)">23</td><td><span class="tag tag-r">❌ Eliminado</span></td></tr>
+        <tr><td class="rank">14</td><td><div class="team-row"><span data-escudo="llaneros:sm"></span>Llaneros FC</div></td><td>19</td><td>6</td><td>4</td><td>9</td><td>22</td><td>32</td><td style="color:var(--rojo)">-10</td><td class="pts" style="color:var(--muted)">22</td><td><span class="tag tag-r">❌ Eliminado</span></td></tr>
+        <tr><td class="rank">15</td><td><div class="team-row"><span data-escudo="fortaleza:sm"></span>Fortaleza CEIF</div></td><td>19</td><td>6</td><td>4</td><td>9</td><td>21</td><td>33</td><td style="color:var(--rojo)">-12</td><td class="pts" style="color:var(--muted)">22</td><td><span class="tag tag-r">❌ Eliminado</span></td></tr>
+        <tr><td class="rank">20</td><td><div class="team-row"><span data-escudo="pereira:sm"></span>Dep. Pereira</div></td><td>19</td><td>2</td><td>4</td><td>13</td><td>14</td><td>42</td><td style="color:var(--rojo)">-28</td><td class="pts" style="color:var(--rojo)">10</td><td><span class="tag tag-r">⬇️ Descenso</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card mt24">
+    <div class="card-label">Semifinales — Tabla tras partido de Ida</div>
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th></tr></thead>
+      <tbody>
+        <tr class="highlight-row"><td class="rank gold">1</td><td><div class="team-row"><span data-escudo="nacional:sm"></span><strong>Atlético Nacional</strong></div></td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td style="color:var(--verde)">+1</td><td class="pts">3</td></tr>
+        <tr><td class="rank">2</td><td><div class="team-row"><span data-escudo="junior:sm"></span>Junior FC</div></td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td class="pts">1</td></tr>
+        <tr><td class="rank">3</td><td><div class="team-row"><span data-escudo="santafe:sm"></span>Ind. Santa Fe</div></td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td class="pts">1</td></tr>
+        <tr><td class="rank">4</td><td><div class="team-row"><span data-escudo="tolima:sm"></span>Deportes Tolima</div></td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td><td style="color:var(--rojo)">-1</td><td class="pts">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════ GOLEADORES ═══════════════════ -->
+<section id="tab-goleadores" class="section">
+  <div class="section-title">Tabla de <span>Goleadores</span></div>
+  <p class="section-sub">Liga BetPlay I-2026 · Actualizado tras Cuartos de Final · Fotos: Transfermarkt</p>
+  <div class="grid-2">
+    <div class="scorers-list">
+
+      <div class="scorer-item">
+        <div class="scorer-rank r1">1</div>
+        <div data-foto="estupinan:sm" style="display:flex;align-items:center"></div>
+        <div class="scorer-info">
+          <div class="scorer-name">Andrey Estupiñán</div>
+          <div class="scorer-club"><span data-escudo="pasto:sm"></span>Deportivo Pasto · Delantero · 26 años</div>
+          <span class="scorer-status st-out">Eliminado en Cuartos</span>
+        </div>
+        <div style="text-align:right"><div class="goals-num">13</div><div class="goals-label">Goles</div></div>
+      </div>
+
+      <div class="scorer-item">
+        <div class="scorer-rank r2">2</div>
+        <div data-foto="rodallega:sm" style="display:flex;align-items:center"></div>
+        <div class="scorer-info">
+          <div class="scorer-name">Hugo Rodallega</div>
+          <div class="scorer-club"><span data-escudo="santafe:sm"></span>Ind. Santa Fe · Delantero · 40 años</div>
+          <span class="scorer-status st-ok">✅ En Semis</span>
+        </div>
+        <div style="text-align:right"><div class="goals-num">11</div><div class="goals-label">Goles</div></div>
+      </div>
+
+      <div class="scorer-item">
+        <div class="scorer-rank r3">3</div>
+        <div data-foto="muriel:sm" style="display:flex;align-items:center"></div>
+        <div class="scorer-info">
+          <div class="scorer-name">Luis Fernando Muriel</div>
+          <div class="scorer-club"><span data-escudo="junior:sm"></span>Junior FC · Delantero · 35 años</div>
+          <span class="scorer-status st-ok">✅ En Semis</span>
+        </div>
+        <div style="text-align:right"><div class="goals-num">11</div><div class="goals-label">Goles</div></div>
+      </div>
+
+      <div class="scorer-item">
+        <div class="scorer-rank r3">3</div>
+        <div style="display:flex;align-items:center"><div class="photo-fallback photo-fallback-sm" style="display:flex;background:linear-gradient(135deg,#FFD700,#CC6600);border:2px solid rgba(0,200,83,.4)">JR</div></div>
+        <div class="scorer-info">
+          <div class="scorer-name">Jorge Rivaldo</div>
+          <div class="scorer-club"><span data-escudo="aguilas:sm"></span>Águilas Doradas · Delantero</div>
+          <span class="scorer-status st-out">Eliminado en Fase Regular</span>
+        </div>
+        <div style="text-align:right"><div class="goals-num">11</div><div class="goals-label">Goles</div></div>
+      </div>
+
+      <div class="scorer-item">
+        <div class="scorer-rank rn">5</div>
+        <div data-foto="morelos:sm" style="display:flex;align-items:center"></div>
+        <div class="scorer-info">
+          <div class="scorer-name">Alfredo Morelos</div>
+          <div class="scorer-club"><span data-escudo="nacional:sm"></span>Atlético Nacional · Delantero · 29 años</div>
+          <span class="scorer-status st-ok">✅ En Semis</span>
+        </div>
+        <div style="text-align:right"><div class="goals-num">10</div><div class="goals-label">Goles</div></div>
+      </div>
+
+      <div class="scorer-item">
+        <div class="scorer-rank rn">5</div>
+        <div style="display:flex;align-items:center"><div class="photo-fallback photo-fallback-sm" style="display:flex;background:linear-gradient(135deg,#37474f,#78909c);border:2px solid rgba(0,200,83,.4)">DM</div></div>
+        <div class="scorer-info">
+          <div class="scorer-name">Dayro Moreno</div>
+          <div class="scorer-club"><span data-escudo="oncecaldas:sm"></span>Once Caldas · Delantero</div>
+          <span class="scorer-status st-out">Eliminado en Cuartos</span>
+        </div>
+        <div style="text-align:right"><div class="goals-num">10</div><div class="goals-label">Goles</div></div>
+      </div>
+
+      <div class="scorer-item">
+        <div class="scorer-rank rn">5</div>
+        <div style="display:flex;align-items:center"><div class="photo-fallback photo-fallback-sm" style="display:flex;background:linear-gradient(135deg,#CC0000,#FF4444);border:2px solid rgba(0,200,83,.4)">YG</div></div>
+        <div class="scorer-info">
+          <div class="scorer-name">Yeison Guzmán</div>
+          <div class="scorer-club"><span data-escudo="america:sm"></span>América de Cali · Delantero</div>
+          <span class="scorer-status st-out">Eliminado en Cuartos</span>
+        </div>
+        <div style="text-align:right"><div class="goals-num">10</div><div class="goals-label">Goles</div></div>
+      </div>
+
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-label">Comparativa Visual — Top Goleadores</div>
+        <div class="divider"></div>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:4px;">
+          <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span data-escudo="pasto:sm"></span><span style="font-family:'Barlow Condensed';font-size:.86rem;color:var(--white);flex:1">Andrey Estupiñán · Pasto</span><span style="font-family:'Bebas Neue';font-size:.95rem;color:var(--naranja)">13⚽</span></div><div class="prob-bar-track" style="height:11px"><div class="prob-bar-fill" style="width:100%;background:linear-gradient(90deg,#e65100,#ff6d00)"></div></div></div>
+          <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span data-escudo="santafe:sm"></span><span style="font-family:'Barlow Condensed';font-size:.86rem;color:var(--white);flex:1">Hugo Rodallega · Santa Fe</span><span style="font-family:'Bebas Neue';font-size:.95rem;color:var(--verde)">11⚽</span></div><div class="prob-bar-track" style="height:11px"><div class="prob-bar-fill bar-1" style="width:84.6%"></div></div></div>
+          <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span data-escudo="junior:sm"></span><span style="font-family:'Barlow Condensed';font-size:.86rem;color:var(--white);flex:1">Luis F. Muriel · Junior</span><span style="font-family:'Bebas Neue';font-size:.95rem;color:var(--verde)">11⚽</span></div><div class="prob-bar-track" style="height:11px"><div class="prob-bar-fill bar-1" style="width:84.6%"></div></div></div>
+          <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span data-escudo="nacional:sm"></span><span style="font-family:'Barlow Condensed';font-size:.86rem;color:var(--white);flex:1">Alfredo Morelos · Nacional</span><span style="font-family:'Bebas Neue';font-size:.95rem;color:var(--azul)">10⚽</span></div><div class="prob-bar-track" style="height:11px"><div class="prob-bar-fill bar-3" style="width:76.9%"></div></div></div>
+          <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span data-escudo="oncecaldas:sm"></span><span style="font-family:'Barlow Condensed';font-size:.86rem;color:var(--white);flex:1">Dayro Moreno · Once Caldas</span><span style="font-family:'Bebas Neue';font-size:.95rem;color:var(--azul)">10⚽</span></div><div class="prob-bar-track" style="height:11px"><div class="prob-bar-fill bar-3" style="width:76.9%"></div></div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-label">¿Quién Ganará el Botín de Oro?</div>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:8px">Estupiñán lidera con 13 goles pero <strong style="color:var(--rojo)">Pasto fue eliminado</strong>. El Botín de Oro puede recaer en <strong style="color:var(--verde)">Morelos (Nacional)</strong> o <strong style="color:#42a5f5">Muriel (Junior)</strong> si llegan a la final. Rodallega (40 años) es la historia romántica del torneo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ EQUIPOS ═══════════════════════ -->
+<section id="tab-equipos" class="section">
+  <div class="section-title">Estadísticas por <span>Equipo</span></div>
+  <p class="section-sub">Rendimiento de los 4 semifinalistas · Fase Regular I-2026 · Escudos oficiales Dimayor</p>
+  <div class="grid-2">
+
+    <div class="team-card">
+      <div class="team-card-header">
+        <span data-escudo="nacional:lg"></span>
+        <div style="flex:1"><div class="team-card-name">Atlético Nacional</div><div class="team-card-pts">1° Fase Regular · 40 pts · DT: Diego Arias</div></div>
+        <div class="perf-score pa">A+</div>
+      </div>
+      <div class="team-stats-grid">
+        <div class="team-stat-box"><div class="val" style="color:var(--verde)">40</div><div class="lbl">Puntos</div></div>
+        <div class="team-stat-box"><div class="val">13</div><div class="lbl">Victorias</div></div>
+        <div class="team-stat-box"><div class="val" style="color:var(--verde)">+20</div><div class="lbl">Dif. Gol</div></div>
+        <div class="team-stat-box"><div class="val">52</div><div class="lbl">Goles F</div></div>
+        <div class="team-stat-box"><div class="val">32</div><div class="lbl">Goles C</div></div>
+        <div class="team-stat-box"><div class="val">2.7</div><div class="lbl">Gol/Pj</div></div>
+      </div>
+      <div class="radar-label">Índices de Rendimiento</div>
+      <div class="radar-bars">
+        <div class="radar-row"><span class="radar-name">Ataque</span><div class="radar-track"><div class="radar-fill" style="width:92%;background:var(--verde)"></div></div><span class="radar-val">9.2</span></div>
+        <div class="radar-row"><span class="radar-name">Defensa</span><div class="radar-track"><div class="radar-fill" style="width:80%;background:var(--verde)"></div></div><span class="radar-val">8.0</span></div>
+        <div class="radar-row"><span class="radar-name">Local</span><div class="radar-track"><div class="radar-fill" style="width:95%;background:var(--verde)"></div></div><span class="radar-val">9.5</span></div>
+        <div class="radar-row"><span class="radar-name">Visitante</span><div class="radar-track"><div class="radar-fill" style="width:76%;background:var(--amarillo)"></div></div><span class="radar-val">7.6</span></div>
+        <div class="radar-row"><span class="radar-name">Regularidad</span><div class="radar-track"><div class="radar-fill" style="width:88%;background:var(--verde)"></div></div><span class="radar-val">8.8</span></div>
+      </div>
+      <p style="margin-top:11px;font-size:.74rem;color:var(--muted);line-height:1.6"><strong style="color:var(--verde)">Goleada histórica</strong>: 7-1 vs Int. Bogotá en cuartos. Morelos y Campuzano son las piezas diferenciales del semestre.</p>
+    </div>
+
+    <div class="team-card">
+      <div class="team-card-header">
+        <span data-escudo="junior:lg"></span>
+        <div style="flex:1"><div class="team-card-name">Junior FC</div><div class="team-card-pts">2° Fase Regular · 35 pts · Campeón Defensor</div></div>
+        <div class="perf-score pa">A</div>
+      </div>
+      <div class="team-stats-grid">
+        <div class="team-stat-box"><div class="val" style="color:#42a5f5">35</div><div class="lbl">Puntos</div></div>
+        <div class="team-stat-box"><div class="val">11</div><div class="lbl">Victorias</div></div>
+        <div class="team-stat-box"><div class="val" style="color:var(--verde)">+14</div><div class="lbl">Dif. Gol</div></div>
+        <div class="team-stat-box"><div class="val">43</div><div class="lbl">Goles F</div></div>
+        <div class="team-stat-box"><div class="val">29</div><div class="lbl">Goles C</div></div>
+        <div class="team-stat-box"><div class="val">2.3</div><div class="lbl">Gol/Pj</div></div>
+      </div>
+      <div class="radar-label">Índices de Rendimiento</div>
+      <div class="radar-bars">
+        <div class="radar-row"><span class="radar-name">Ataque</span><div class="radar-track"><div class="radar-fill" style="width:82%;background:var(--azul)"></div></div><span class="radar-val">8.2</span></div>
+        <div class="radar-row"><span class="radar-name">Defensa</span><div class="radar-track"><div class="radar-fill" style="width:78%;background:var(--azul)"></div></div><span class="radar-val">7.8</span></div>
+        <div class="radar-row"><span class="radar-name">Local</span><div class="radar-track"><div class="radar-fill" style="width:90%;background:var(--azul)"></div></div><span class="radar-val">9.0</span></div>
+        <div class="radar-row"><span class="radar-name">Visitante</span><div class="radar-track"><div class="radar-fill" style="width:72%;background:var(--amarillo)"></div></div><span class="radar-val">7.2</span></div>
+        <div class="radar-row"><span class="radar-name">Regularidad</span><div class="radar-track"><div class="radar-fill" style="width:82%;background:var(--azul)"></div></div><span class="radar-val">8.2</span></div>
+      </div>
+      <p style="margin-top:11px;font-size:.74rem;color:var(--muted);line-height:1.6"><strong style="color:#42a5f5">Campeón defensor</strong>. Muriel (11 goles) es la pieza clave ofensiva. El Romelio Martínez es su fortaleza inexpugnable.</p>
+    </div>
+
+    <div class="team-card">
+      <div class="team-card-header">
+        <span data-escudo="santafe:lg"></span>
+        <div style="flex:1"><div class="team-card-name">Ind. Santa Fe</div><div class="team-card-pts">7° Fase Regular · 29 pts · Copa Libertadores</div></div>
+        <div class="perf-score pb">B+</div>
+      </div>
+      <div class="team-stats-grid">
+        <div class="team-stat-box"><div class="val" style="color:var(--rojo)">29</div><div class="lbl">Puntos</div></div>
+        <div class="team-stat-box"><div class="val">8</div><div class="lbl">Victorias</div></div>
+        <div class="team-stat-box"><div class="val" style="color:var(--verde)">+4</div><div class="lbl">Dif. Gol</div></div>
+        <div class="team-stat-box"><div class="val">31</div><div class="lbl">Goles F</div></div>
+        <div class="team-stat-box"><div class="val">27</div><div class="lbl">Goles C</div></div>
+        <div class="team-stat-box"><div class="val">1.6</div><div class="lbl">Gol/Pj</div></div>
+      </div>
+      <div class="radar-label">Índices de Rendimiento</div>
+      <div class="radar-bars">
+        <div class="radar-row"><span class="radar-name">Ataque</span><div class="radar-track"><div class="radar-fill" style="width:65%;background:var(--rojo)"></div></div><span class="radar-val">6.5</span></div>
+        <div class="radar-row"><span class="radar-name">Defensa</span><div class="radar-track"><div class="radar-fill" style="width:72%;background:var(--rojo)"></div></div><span class="radar-val">7.2</span></div>
+        <div class="radar-row"><span class="radar-name">Local</span><div class="radar-track"><div class="radar-fill" style="width:70%;background:var(--rojo)"></div></div><span class="radar-val">7.0</span></div>
+        <div class="radar-row"><span class="radar-name">Visitante</span><div class="radar-track"><div class="radar-fill" style="width:68%;background:var(--amarillo)"></div></div><span class="radar-val">6.8</span></div>
+        <div class="radar-row"><span class="radar-name">Regularidad</span><div class="radar-track"><div class="radar-fill" style="width:66%;background:var(--rojo)"></div></div><span class="radar-val">6.6</span></div>
+      </div>
+      <p style="margin-top:11px;font-size:.74rem;color:var(--muted);line-height:1.6"><strong style="color:var(--rojo)">Sorpresa del torneo</strong>. Clasificaron 7° pero golearon 5-1 a América en cuartos. Rodallega marcó hat-trick a los 40 años. También en Copa Libertadores.</p>
+    </div>
+
+    <div class="team-card">
+      <div class="team-card-header">
+        <span data-escudo="tolima:lg"></span>
+        <div style="flex:1"><div class="team-card-name">Deportes Tolima</div><div class="team-card-pts">6° Fase Regular · 31 pts · DT: Lucas González</div></div>
+        <div class="perf-score pb">B</div>
+      </div>
+      <div class="team-stats-grid">
+        <div class="team-stat-box"><div class="val" style="color:var(--amarillo)">31</div><div class="lbl">Puntos</div></div>
+        <div class="team-stat-box"><div class="val">9</div><div class="lbl">Victorias</div></div>
+        <div class="team-stat-box"><div class="val" style="color:var(--verde)">+5</div><div class="lbl">Dif. Gol</div></div>
+        <div class="team-stat-box"><div class="val">33</div><div class="lbl">Goles F</div></div>
+        <div class="team-stat-box"><div class="val">28</div><div class="lbl">Goles C</div></div>
+        <div class="team-stat-box"><div class="val">1.7</div><div class="lbl">Gol/Pj</div></div>
+      </div>
+      <div class="radar-label">Índices de Rendimiento</div>
+      <div class="radar-bars">
+        <div class="radar-row"><span class="radar-name">Ataque</span><div class="radar-track"><div class="radar-fill" style="width:68%;background:var(--amarillo)"></div></div><span class="radar-val">6.8</span></div>
+        <div class="radar-row"><span class="radar-name">Defensa</span><div class="radar-track"><div class="radar-fill" style="width:70%;background:var(--amarillo)"></div></div><span class="radar-val">7.0</span></div>
+        <div class="radar-row"><span class="radar-name">Local</span><div class="radar-track"><div class="radar-fill" style="width:78%;background:var(--amarillo)"></div></div><span class="radar-val">7.8</span></div>
+        <div class="radar-row"><span class="radar-name">Visitante</span><div class="radar-track"><div class="radar-fill" style="width:52%;background:var(--rojo)"></div></div><span class="radar-val">5.2</span></div>
+        <div class="radar-row"><span class="radar-name">Regularidad</span><div class="radar-track"><div class="radar-fill" style="width:62%;background:var(--amarillo)"></div></div><span class="radar-val">6.2</span></div>
+      </div>
+      <p style="margin-top:11px;font-size:.74rem;color:var(--muted);line-height:1.6">Equipo con <strong style="color:var(--amarillo)">altibajos</strong>. Su debilidad como visitante (5.2/10) es crítica ante Nacional. El "Chino" Sandoval es su principal desequilibrador.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════ JUGADORES ═══════════════════════ -->
+<section id="tab-jugadores" class="section">
+  <div class="section-title">Estadísticas por <span>Jugador</span></div>
+  <p class="section-sub">Indicadores de rendimiento individuales · Fotos reales vía Transfermarkt · Escudos oficiales</p>
+  <div class="player-grid">
+
+    <div class="player-card">
+      <div class="player-card-header">
+        <div data-foto="morelos:lg" style="display:flex;align-items:center"></div>
+        <div style="flex:1">
+          <div class="player-card-name">Alfredo Morelos</div>
+          <div class="player-card-pos">Delantero centro · Colombia · 29 años</div>
+          <div class="player-card-club"><span data-escudo="nacional:sm"></span>Atlético Nacional</div>
+        </div>
+        <div class="perf-score pa">A</div>
+      </div>
+      <div class="stat-rows">
+        <div class="stat-row"><span class="stat-label">Goles</span><span class="stat-val" style="color:var(--verde)">10</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:77%;background:var(--verde)"></div></div>
+        <div class="stat-row"><span class="stat-label">Asistencias</span><span class="stat-val">3</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:45%;background:var(--azul)"></div></div>
+        <div class="stat-row"><span class="stat-label">Goles / 90 min</span><span class="stat-val" style="color:var(--verde)">0.65</span></div>
+        <div class="stat-row"><span class="stat-label">Duelos Aéreos Ganados</span><span class="stat-val">58%</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:58%;background:var(--amarillo)"></div></div>
+        <div class="stat-row"><span class="stat-label">Tarjetas Amarillas</span><span class="stat-val" style="color:var(--amarillo)">4</span></div>
+      </div>
+      <p class="player-note">El "Búfalo" fue clave en la goleada 7-1 a Internacional en cuartos. Firmó con Nacional hasta diciembre 2028. Jugador diferencial del semestre.</p>
+    </div>
+
+    <div class="player-card">
+      <div class="player-card-header">
+        <div data-foto="rodallega:lg" style="display:flex;align-items:center"></div>
+        <div style="flex:1">
+          <div class="player-card-name">Hugo Rodallega</div>
+          <div class="player-card-pos">Delantero · Colombia · 40 años</div>
+          <div class="player-card-club"><span data-escudo="santafe:sm"></span>Independiente Santa Fe</div>
+        </div>
+        <div class="perf-score pa">A+</div>
+      </div>
+      <div class="stat-rows">
+        <div class="stat-row"><span class="stat-label">Goles</span><span class="stat-val" style="color:var(--verde)">11</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:84%;background:var(--verde)"></div></div>
+        <div class="stat-row"><span class="stat-label">Asistencias</span><span class="stat-val">2</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:30%;background:var(--azul)"></div></div>
+        <div class="stat-row"><span class="stat-label">Goles / 90 min</span><span class="stat-val" style="color:var(--verde)">0.72</span></div>
+        <div class="stat-row"><span class="stat-label">Efectividad Penales</span><span class="stat-val">100%</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--amarillo)"></div></div>
+        <div class="stat-row"><span class="stat-label">Goles en Playoffs</span><span class="stat-val" style="color:var(--amarillo)">4</span></div>
+      </div>
+      <p class="player-note">Leyenda viva. Triplete ante América de Cali a los 40 años. Renovó contrato con Santa Fe hasta dic 2026. Historia romántica del torneo.</p>
+    </div>
+
+    <div class="player-card">
+      <div class="player-card-header">
+        <div data-foto="muriel:lg" style="display:flex;align-items:center"></div>
+        <div style="flex:1">
+          <div class="player-card-name">Luis Fernando Muriel</div>
+          <div class="player-card-pos">Delantero · Colombia · 35 años</div>
+          <div class="player-card-club"><span data-escudo="junior:sm"></span>Junior FC</div>
+        </div>
+        <div class="perf-score pa">A</div>
+      </div>
+      <div class="stat-rows">
+        <div class="stat-row"><span class="stat-label">Goles</span><span class="stat-val" style="color:var(--verde)">11</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:84%;background:var(--verde)"></div></div>
+        <div class="stat-row"><span class="stat-label">Asistencias</span><span class="stat-val">5</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:75%;background:var(--azul)"></div></div>
+        <div class="stat-row"><span class="stat-label">Goles / 90 min</span><span class="stat-val" style="color:var(--verde)">0.68</span></div>
+        <div class="stat-row"><span class="stat-label">Pases Clave / 90</span><span class="stat-val">2.1</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:70%;background:var(--azul)"></div></div>
+        <div class="stat-row"><span class="stat-label">Velocidad máx. (km/h)</span><span class="stat-val" style="color:var(--amarillo)">32.4</span></div>
+      </div>
+      <p class="player-note">Ex-Atalanta, llegó en 2026 desde Orlando City. Motor y goleador del Tiburón. Su combinación goles + asistencias lo hace el jugador más completo de Junior.</p>
+    </div>
+
+    <div class="player-card">
+      <div class="player-card-header">
+        <div data-foto="estupinan:lg" style="display:flex;align-items:center"></div>
+        <div style="flex:1">
+          <div class="player-card-name">Andrey Estupiñán</div>
+          <div class="player-card-pos">Delantero · Colombia · 26 años</div>
+          <div class="player-card-club"><span data-escudo="pasto:sm"></span>Deportivo Pasto (Eliminado)</div>
+        </div>
+        <div class="perf-score pa">A+</div>
+      </div>
+      <div class="stat-rows">
+        <div class="stat-row"><span class="stat-label">Goles</span><span class="stat-val" style="color:var(--naranja)">13</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--naranja)"></div></div>
+        <div class="stat-row"><span class="stat-label">Asistencias</span><span class="stat-val">4</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:60%;background:var(--naranja)"></div></div>
+        <div class="stat-row"><span class="stat-label">Goles / 90 min</span><span class="stat-val" style="color:var(--naranja)">0.80</span></div>
+        <div class="stat-row"><span class="stat-label">Remates a Puerta / 90</span><span class="stat-val">3.2</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:82%;background:var(--naranja)"></div></div>
+        <div class="stat-row"><span class="stat-label">Precisión de Remate</span><span class="stat-val">71%</span></div>
+      </div>
+      <p class="player-note">Goleador #1 del torneo con 13 tantos. Actuación individual sobresaliente, aunque Pasto fue eliminado en cuartos. Gran promesa del fútbol colombiano.</p>
+    </div>
+
+    <div class="player-card">
+      <div class="player-card-header">
+        <div data-foto="campuzano:lg" style="display:flex;align-items:center"></div>
+        <div style="flex:1">
+          <div class="player-card-name">Jorman Campuzano</div>
+          <div class="player-card-pos">Mediocampista Pivote · Colombia · 29 años</div>
+          <div class="player-card-club"><span data-escudo="nacional:sm"></span>Atlético Nacional</div>
+        </div>
+        <div class="perf-score pa">A</div>
+      </div>
+      <div class="stat-rows">
+        <div class="stat-row"><span class="stat-label">Goles</span><span class="stat-val">3</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:23%;background:var(--verde)"></div></div>
+        <div class="stat-row"><span class="stat-label">Asistencias</span><span class="stat-val">7</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:78%;background:var(--verde)"></div></div>
+        <div class="stat-row"><span class="stat-label">Intercepciones / 90</span><span class="stat-val" style="color:var(--verde)">3.8</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:85%;background:var(--verde)"></div></div>
+        <div class="stat-row"><span class="stat-label">Pases Completados</span><span class="stat-val">88%</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:88%;background:var(--verde)"></div></div>
+        <div class="stat-row"><span class="stat-label">Km Recorridos / 90</span><span class="stat-val" style="color:var(--amarillo)">11.2</span></div>
+      </div>
+      <p class="player-note">Motor del mediocampo verdolaga. Firmó con Nacional hasta junio 2028. Su capacidad de recuperación y distribución ha sido fundamental para el liderato.</p>
+    </div>
+
+    <div class="player-card">
+      <div class="player-card-header">
+        <div data-foto="fernandez:lg" style="display:flex;align-items:center"></div>
+        <div style="flex:1">
+          <div class="player-card-name">Omar Fernández Frasica</div>
+          <div class="player-card-pos">Extremo / Mediocampista · Colombia · 23 años</div>
+          <div class="player-card-club"><span data-escudo="junior:sm"></span>Junior FC</div>
+        </div>
+        <div class="perf-score pb">B+</div>
+      </div>
+      <div class="stat-rows">
+        <div class="stat-row"><span class="stat-label">Goles</span><span class="stat-val">4</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:31%;background:var(--azul)"></div></div>
+        <div class="stat-row"><span class="stat-label">Asistencias</span><span class="stat-val">8</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:88%;background:var(--azul)"></div></div>
+        <div class="stat-row"><span class="stat-label">Regates Exitosos / 90</span><span class="stat-val" style="color:var(--azul)">3.1</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:85%;background:var(--azul)"></div></div>
+        <div class="stat-row"><span class="stat-label">Centros Completados</span><span class="stat-val">38%</span></div>
+        <div class="stat-row"><span class="stat-label">Velocidad máx. (km/h)</span><span class="stat-val" style="color:var(--amarillo)">34.1</span></div>
+      </div>
+      <p class="player-note">Joven más desequilibrante del FPC en este semestre. Su velocidad y regate son el arma secreta de Junior en el Romelio Martínez.</p>
+    </div>
+
+    <div class="player-card">
+      <div class="player-card-header">
+        <div data-foto="sandoval:lg" style="display:flex;align-items:center"></div>
+        <div style="flex:1">
+          <div class="player-card-name">L. F. Sandoval "El Chino"</div>
+          <div class="player-card-pos">Mediocampista Ofensivo · Colombia · 28 años</div>
+          <div class="player-card-club"><span data-escudo="tolima:sm"></span>Deportes Tolima</div>
+        </div>
+        <div class="perf-score pb">B+</div>
+      </div>
+      <div class="stat-rows">
+        <div class="stat-row"><span class="stat-label">Goles</span><span class="stat-val">5</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:38%;background:var(--amarillo)"></div></div>
+        <div class="stat-row"><span class="stat-label">Asistencias</span><span class="stat-val">6</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:65%;background:var(--amarillo)"></div></div>
+        <div class="stat-row"><span class="stat-label">Regates Exitosos / 90</span><span class="stat-val">2.4</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:70%;background:var(--amarillo)"></div></div>
+        <div class="stat-row"><span class="stat-label">Pases Clave / 90</span><span class="stat-val">2.8</span></div>
+        <div class="stat-row"><span class="stat-label">Duelos Ganados</span><span class="stat-val" style="color:var(--amarillo)">54%</span></div>
+      </div>
+      <p class="player-note">Creatividad y desequilibrio del Tolima. Necesita un partido monumental para darle la vuelta a la semifinal ante Nacional en el Atanasio Girardot.</p>
+    </div>
+
+    <div class="player-card">
+      <div class="player-card-header">
+        <div data-foto="bustos:lg" style="display:flex;align-items:center"></div>
+        <div style="flex:1">
+          <div class="player-card-name">Nahuel Bustos</div>
+          <div class="player-card-pos">Delantero / Extremo · Argentina · 28 años</div>
+          <div class="player-card-club"><span data-escudo="santafe:sm"></span>Independiente Santa Fe</div>
+        </div>
+        <div class="perf-score pb">B</div>
+      </div>
+      <div class="stat-rows">
+        <div class="stat-row"><span class="stat-label">Goles</span><span class="stat-val">6</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:46%;background:var(--rojo)"></div></div>
+        <div class="stat-row"><span class="stat-label">Asistencias</span><span class="stat-val">5</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:60%;background:var(--rojo)"></div></div>
+        <div class="stat-row"><span class="stat-label">Remates / 90 min</span><span class="stat-val">2.6</span></div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:65%;background:var(--rojo)"></div></div>
+        <div class="stat-row"><span class="stat-label">Duelos Ganados</span><span class="stat-val">52%</span></div>
+        <div class="stat-row"><span class="stat-label">Tarjetas Amarillas</span><span class="stat-val" style="color:var(--amarillo)">5</span></div>
+      </div>
+      <p class="player-note">Socio ofensivo de Rodallega. Su movilidad en banda hace difícil la marca. Neutralizado en la ida ante Junior en el Campín, buscará revertirlo en el Romelio.</p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">Liga BetPlay Dimayor · Dashboard I-2026</div>
+  <div class="footer-note">Escudos: football-logos.cc &amp; assets.football-logos.cc · Fotos jugadores: Transfermarkt · Datos: Dimayor / GolCaracol / ESPN / Futbolred / WinSports · 23 Mayo 2026</div>
+</footer>
+
+</body>
+</html>
